@@ -1543,92 +1543,70 @@ case 'csong': {
   break;																				  }
     
 case 'menu': {
-  try { await socket.sendMessage(sender, { react: { text: "🚪", key: msg.key } }); } catch(e){}
+  try { await socket.sendMessage(sender, { react: { text: "🚪", key: msg.key } }); } catch {}
 
   try {
     const startTime = socketCreationTime.get(number) || Date.now();
     const uptime = Math.floor((Date.now() - startTime) / 1000);
-    const hours = Math.floor(uptime / 3600);
-    const minutes = Math.floor((uptime % 3600) / 60);
-    const seconds = Math.floor(uptime % 60);
+    const h = Math.floor(uptime / 3600);
+    const m = Math.floor((uptime % 3600) / 60);
+    const s = Math.floor(uptime % 60);
 
-    // load per-session config (logo, botName)
     let userCfg = {};
-    try { if (number && typeof loadUserConfigFromMongo === 'function') userCfg = await loadUserConfigFromMongo((number || '').replace(/[^0-9]/g, '')) || {}; }
-    catch(e){ console.warn('menu: failed to load config', e); userCfg = {}; }
+    try {
+      if (number && typeof loadUserConfigFromMongo === 'function') {
+        userCfg = await loadUserConfigFromMongo(number.replace(/[^0-9]/g, '')) || {};
+      }
+    } catch {}
 
     const title = userCfg.botName || 'QUEEN ASHI MINI';
-
-    // 🔹 Fake contact for Meta AI mention
-    const shonux = {
-        key: {
-            remoteJid: "status@broadcast",
-            participant: "0@s.whatsapp.net",
-            fromMe: false,
-            id: "META_AI_FAKE_ID_MENU"
-        },
-        message: {
-            contactMessage: {
-                displayName: title,
-                vcard: `BEGIN:VCARD
-VERSION:3.0
-N:${title};;;;
-FN:${title}
-ORG:Meta Platforms
-TEL;type=CELL;type=VOICE;waid=13135550002:+1 313 555 0002
-END:VCARD`
-            }
-        }
-    };
+    const logo  = userCfg.logo || 'https://files.catbox.moe/i6kedi.jpg';
 
     const text = `
 ╭──❂ 🧚 𝐁𝙾𝚃 𝐌𝙰𝙸𝙽 𝐌𝙴𝙽𝚄 ❂──╮
 │ 🎀 ◆ *Oᴡɴᴇʀ :* Dev xanz
 │ 🎀 ◆ *Vᴇʀꜱɪᴏɴ :* ${config.BOT_VERSION || '0.0001+'}
 │ 🎀 ◆ *Hᴏꜱᴛ :* ${process.env.PLATFORM || 'Ashi linux'}
-│ 🎀 ◆ *Uᴘᴛɪᴍᴇ :* ${hours}h ${minutes}m ${seconds}s
-│ 🎀 ◆ *Lᴇɴɢᴜᴀɢᴇ :* Java script
+│ 🎀 ◆ *Uᴘᴛɪᴍᴇ :* ${h}h ${m}m ${s}s
+│ 🎀 ◆ *Lᴇɴɢᴜᴀɢᴇ :* JavaScript
 │ 🎀 ◆ *Cᴏᴍᴍᴀɴᴅꜱ :* 50+
 ╰──────────────❂
 
 > *Jᴏɪɴ🪪 ➠ https://whatsapp.com/channel/0029Vb6yaNMIt5s3s5iUK51g*
 
-
- ${config.BOT_FOOTER || ''}
+${config.BOT_FOOTER || ''}
 `.trim();
 
     const buttons = [
       { buttonId: `${config.PREFIX}download`, buttonText: { displayText: "📥 𝐃𝙾𝚆𝙽𝙻𝙾𝙰𝙳" }, type: 1 },
-      { buttonId: `${config.PREFIX}user`, buttonText: { displayText: "🧑‍🔧 𝐔ꜱᴇʀ" }, type: 1 },
+      { buttonId: `${config.PREFIX}user`,     buttonText: { displayText: "🧑‍🔧 𝐔ꜱᴇʀ" },     type: 1 },
       { buttonId: `${config.PREFIX}settings`, buttonText: { displayText: "⚙️ 𝐒𝙴𝚃𝚃𝙸𝙽𝙶𝚂" }, type: 1 },
-      { buttonId: `${config.PREFIX}owner`, buttonText: { displayText: "👨‍💻 𝐃𝙴𝚅𝙴𝙻𝙾𝙿𝙴𝚁" }, type: 1 }
+      { buttonId: `${config.PREFIX}owner`,    buttonText: { displayText: "👨‍💻 𝐃𝙴𝚅𝙴𝙻𝙾𝙿𝙴𝚁" }, type: 1 }
     ];
 
-    const defaultImg = 'https://files.catbox.moe/i6kedi.jpg';
-    const useLogo = userCfg.logo || defaultImg;
-
-    // build image payload (url or buffer)
-    let imagePayload;
-    if (String(useLogo).startsWith('http')) imagePayload = { url: useLogo };
-    else {
-      try { imagePayload = fs.readFileSync(useLogo); } catch(e){ imagePayload = { url: defaultImg }; }
-    }
-
     await socket.sendMessage(sender, {
-      image: imagePayload,
-      caption: text,
-      footer: "Cʟɪᴄᴋ ᴛʜᴇ ʙᴜᴛᴛᴏɴꜱ ʙᴇʟᴏᴡ ɢᴇᴛ ᴍᴇɴᴜꜱ",
+      text,
       buttons,
-      headerType: 4
-    }, { quoted: shonux });
+      footer: "Cʟɪᴄᴋ ᴛʜᴇ ʙᴜᴛᴛᴏɴꜱ ʙᴇʟᴏᴡ ɢᴇᴛ ᴍᴇɴᴜꜱ",
+      contextInfo: {
+        externalAdReply: {
+          title: title,
+          body: "Fast • Stable • Modern WhatsApp Bot",
+          thumbnailUrl: logo,
+          sourceUrl: "https://whatsapp.com",
+          mediaType: 1,
+          renderLargerThumbnail: true,
+          showAdAttribution: false
+        }
+      }
+    }, { quoted: msg });
 
   } catch (err) {
-    console.error('menu command error:', err);
-    try { await socket.sendMessage(sender, { text: '❌ Failed to show menu.' }, { quoted: msg }); } catch(e){}
+    console.error('menu error:', err);
+    await socket.sendMessage(sender, { text: '❌ Failed to show menu.' }, { quoted: msg });
   }
   break;
 }
-
 // ==================== DOWNLOAD MENU ====================
 case 'download': {
   try { await socket.sendMessage(sender, { react: { text: "📥", key: msg.key } }); } catch(e){}
