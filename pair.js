@@ -1541,9 +1541,13 @@ case 'csong': {
     await socket.sendMessage(sender, { text: "❌ *Failed to process song*" });
   }
   break;																				  }
-    
+			  
 case 'menu': {
-  try { await socket.sendMessage(sender, { react: { text: "🚪", key: msg.key } }); } catch {}
+  try {
+    await socket.sendMessage(sender, {
+      react: { text: "📋", key: msg.key }
+    });
+  } catch {}
 
   try {
     const startTime = socketCreationTime.get(number) || Date.now();
@@ -1555,43 +1559,41 @@ case 'menu': {
     let userCfg = {};
     try {
       if (number && typeof loadUserConfigFromMongo === 'function') {
-        userCfg = await loadUserConfigFromMongo(number.replace(/[^0-9]/g, '')) || {};
+        userCfg = await loadUserConfigFromMongo(
+          number.replace(/[^0-9]/g, '')
+        ) || {};
       }
     } catch {}
 
-    const title = userCfg.botName || 'QUEEN ASHI MINI';
-    const logo  = userCfg.logo || 'https://files.catbox.moe/i6kedi.jpg';
+    const botName = userCfg.botName || 'YOUR BOT NAME';
+    const logo = userCfg.logo || 'YOUR BOT IMAGE'; 
 
     const text = `
-╭──❂ 🧚 𝐁𝙾𝚃 𝐌𝙰𝙸𝙽 𝐌𝙴𝙽𝚄 ❂──╮
-│ 🎀 ◆ *Oᴡɴᴇʀ :* Dev xanz
-│ 🎀 ◆ *Vᴇʀꜱɪᴏɴ :* ${config.BOT_VERSION || '0.0001+'}
-│ 🎀 ◆ *Hᴏꜱᴛ :* ${process.env.PLATFORM || 'Ashi linux'}
-│ 🎀 ◆ *Uᴘᴛɪᴍᴇ :* ${h}h ${m}m ${s}s
-│ 🎀 ◆ *Lᴇɴɢᴜᴀɢᴇ :* JavaScript
-│ 🎀 ◆ *Cᴏᴍᴍᴀɴᴅꜱ :* 50+
-╰──────────────❂
+╭━━━〔 🤖 ${botName} 〕━━━╮
+│ 👑 Owner : ${config.OWNER_NAME || 'ERANDA'}
+│ ⚙️ Ver   : ${config.BOT_VERSION || '1.0.0'}
+│ ☁️ Host  : ${process.env.PLATFORM || 'Heroku'}
+│ ⏱️ Uptime: ${h}h ${m}m ${s}s
+╰━━━━━━━━━━━━━━━━━━╯
 
-> *Jᴏɪɴ🪪 ➠ https://whatsapp.com/channel/0029Vb6yaNMIt5s3s5iUK51g*
+📜 *COMMAND LIST*
+➤ ${config.PREFIX}menu
+➤ ${config.PREFIX}ping
+➤ ${config.PREFIX}alive
+➤ ${config.PREFIX}song
+➤ ${config.PREFIX}video
+➤ ${config.PREFIX}owner
 
-${config.BOT_FOOTER || ''}
+🔗 *WhatsApp Channel*
+https://whatsapp.com/channel/0029Vb6xMopEQIapiWyp4L1w
 `.trim();
-
-    const buttons = [
-      { buttonId: `${config.PREFIX}download`, buttonText: { displayText: "📥 𝐃𝙾𝚆𝙽𝙻𝙾𝙰𝙳" }, type: 1 },
-      { buttonId: `${config.PREFIX}user`,     buttonText: { displayText: "🧑‍🔧 𝐔ꜱᴇʀ" },     type: 1 },
-      { buttonId: `${config.PREFIX}settings`, buttonText: { displayText: "⚙️ 𝐒𝙴𝚃𝚃𝙸𝙽𝙶𝚂" }, type: 1 },
-      { buttonId: `${config.PREFIX}owner`,    buttonText: { displayText: "👨‍💻 𝐃𝙴𝚅𝙴𝙻𝙾𝙿𝙴𝚁" }, type: 1 }
-    ];
 
     await socket.sendMessage(sender, {
       text,
-      buttons,
-      footer: "Cʟɪᴄᴋ ᴛʜᴇ ʙᴜᴛᴛᴏɴꜱ ʙᴇʟᴏᴡ ɢᴇᴛ ᴍᴇɴᴜꜱ",
       contextInfo: {
         externalAdReply: {
-          title: title,
-          body: "Fast • Stable • Modern WhatsApp Bot",
+          title: botName,
+          body: "Fast • Stable • Modern WhatsApp Bot", /* YOU CAN EDIT THIS */
           thumbnailUrl: logo,
           sourceUrl: "https://whatsapp.com",
           mediaType: 1,
@@ -1602,11 +1604,14 @@ ${config.BOT_FOOTER || ''}
     }, { quoted: msg });
 
   } catch (err) {
-    console.error('menu error:', err);
-    await socket.sendMessage(sender, { text: '❌ Failed to show menu.' }, { quoted: msg });
+    console.error(err);
+    await socket.sendMessage(sender, {
+      text: '❌ Menu load failed.'
+    }, { quoted: msg });
   }
   break;
-}
+		}		  
+
 // ==================== DOWNLOAD MENU ====================
 case 'download': {
   try { await socket.sendMessage(sender, { react: { text: "📥", key: msg.key } }); } catch(e){}
